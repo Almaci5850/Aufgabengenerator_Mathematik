@@ -3,36 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trainer: Gemischte Zahlen</title>
+    <title>Trainer: Gemischte Zahlen addieren und subtrahieren</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* HIER WURDE DIE FARBE GEÄNDERT */
             background-color: #54a0ff; 
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .container {
             background-color: white;
             padding: 2rem;
             border-radius: 15px;
-            /* Schatten etwas angepasst für besseren Kontrast zum blauen Hintergrund */
             box-shadow: 0 15px 30px rgba(0,0,0,0.15);
             text-align: center;
-            max-width: 550px;
-            width: 90%;
+            max-width: 600px;
+            width: 100%;
         }
 
-        h2 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-        }
+        h2 { color: #2c3e50; margin-bottom: 1rem; margin-top: 0; }
 
-        /* Difficulty Selector Styling */
         .difficulty-container {
             background-color: #ecf0f1;
             padding: 10px;
@@ -60,7 +56,6 @@
             flex-wrap: wrap;
         }
 
-        /* Fraction styling */
         .fraction {
             display: inline-block;
             text-align: center;
@@ -68,19 +63,9 @@
             margin: 0 5px;
             font-size: 0.8em;
         }
-        .top {
-            border-bottom: 2px solid #34495e;
-            display: block;
-            padding: 0 5px;
-        }
-        .bottom {
-            display: block;
-            padding: 0 5px;
-        }
-        .whole {
-            font-size: 1.2em;
-            margin-right: 2px;
-        }
+        .top { border-bottom: 2px solid #34495e; display: block; padding: 0 5px; }
+        .bottom { display: block; padding: 0 5px; }
+        .whole { font-size: 1.2em; margin-right: 2px; }
 
         .input-group {
             display: flex;
@@ -99,43 +84,45 @@
             border-radius: 8px;
             transition: border-color 0.3s;
         }
+        input:focus { outline: none; border-color: #3498db; }
 
-        input:focus {
-            outline: none;
-            border-color: #3498db;
-        }
+        .fraction-input { display: flex; flex-direction: column; gap: 5px; }
 
-        .fraction-input {
+        .button-row {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
         .btn {
-            background-color: #3498db;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             font-size: 1rem;
             border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.3s;
-            margin: 5px;
+            transition: transform 0.1s, opacity 0.2s;
+            flex: 1 1 auto;
+            min-width: 120px;
         }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-check { background-color: #3498db; }
+        .btn-check:hover { background-color: #2980b9; }
 
-        .btn:hover {
-            background-color: #2980b9;
-        }
+        .btn-new { background-color: #95a5a6; }
+        .btn-new:hover { background-color: #7f8c8d; }
 
-        .btn-new {
-            background-color: #95a5a6;
-        }
-        .btn-new:hover {
-            background-color: #7f8c8d;
-        }
+        .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+        .btn-hint:hover { background-color: #f39c12; }
+
+        .btn-sol { background-color: #9b59b6; }
+        .btn-sol:hover { background-color: #8e44ad; }
 
         #feedback {
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             font-size: 1.1rem;
             font-weight: bold;
             min-height: 1.5em;
@@ -143,13 +130,44 @@
 
         .correct { color: #27ae60; }
         .wrong { color: #c0392b; }
-        .hint { font-size: 0.9rem; color: #7f8c8d; margin-top: 5px; font-weight: normal; }
+        
+        #hintBox, #solutionBox {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        #hintBox { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        #solutionBox { background-color: #e8f6f3; color: #2c3e50; border: 1px solid #d4efdf; }
+
+        .step-title {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .inline-frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.85em;
+            margin: 0 2px;
+        }
+        .inline-frac .t { border-bottom: 1px solid currentColor; padding: 0 2px; }
+        .inline-frac .b { padding: 0 2px; }
+
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Gemischte Zahlen</h2>
+    <h2>Trainer: Gemischte Zahlen</h2>
     
     <div class="difficulty-container">
         <strong>Schwierigkeit:</strong><br>
@@ -161,8 +179,7 @@
         </label>
     </div>
 
-    <div class="task-display" id="taskArea">
-        </div>
+    <div class="task-display" id="taskArea"></div>
 
     <div class="input-group">
         <div style="text-align:center">
@@ -176,10 +193,18 @@
         </div>
     </div>
 
-    <button class="btn" onclick="checkAnswer()">Prüfen</button>
-    <button class="btn btn-new" onclick="generateTask()">Neue Aufgabe</button>
+    <div class="button-row">
+        <button class="btn btn-check" onclick="checkAnswer()">Prüfen</button>
+        <button class="btn btn-hint" onclick="showHint()">💡 Hinweis</button>
+    </div>
+    <div class="button-row">
+        <button class="btn btn-sol" onclick="showSolution()">📝 Lösungsweg</button>
+        <button class="btn btn-new" onclick="generateTask()">🔄 Neue Aufgabe</button>
+    </div>
 
     <div id="feedback"></div>
+    <div id="hintBox"></div>
+    <div id="solutionBox"></div>
 </div>
 
 <script>
@@ -191,177 +216,54 @@
         return [n / common, d / common];
     }
     function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
     function getDifficulty() {
         const radios = document.getElementsByName('difficulty');
-        for (let r of radios) {
-            if (r.checked) return parseInt(r.value);
-        }
+        for (let r of radios) if (r.checked) return parseInt(r.value);
         return 1;
     }
 
+    function fracHTML(w, n, d) {
+        let wHtml = w != 0 ? `<span style="font-size:1.1em; margin-right:2px">${w}</span>` : '';
+        if (n == 0) return wHtml || '0';
+        return `${wHtml}<span class="inline-frac"><span class="t">${n}</span><span class="b">${d}</span></span>`;
+    }
+    
+    function simpleFracHTML(n, d) {
+        return `<span class="inline-frac"><span class="t">${n}</span><span class="b">${d}</span></span>`;
+    }
+
     function generateTask() {
-        // Reset Inputs
         document.getElementById('inputWhole').value = '';
         document.getElementById('inputNum').value = '';
         document.getElementById('inputDenom').value = '';
         document.getElementById('feedback').innerHTML = '';
         document.getElementById('feedback').className = '';
+        document.getElementById('hintBox').style.display = 'none';
+        document.getElementById('solutionBox').style.display = 'none';
 
         const level = getDifficulty();
         let validTaskFound = false;
-
         let num1_obj, num2_obj, op;
 
-        // Schleife, bis wir Zahlen gefunden haben, die zur Schwierigkeitsstufe passen
         while (!validTaskFound) {
-            
             const d1 = rnd(2, 12);
-            // Häufiger gleicher Nenner für einfachere Aufgaben, sonst zufällig
             const d2 = Math.random() > 0.4 ? d1 : rnd(2, 12);
-
-            // Ganze Zahlen
             let w1 = rnd(1, 8);
             let w2 = rnd(1, 6);
-
-            // Zähler (müssen kleiner als Nenner sein für gemischte Zahlen Definition)
             let n1 = rnd(1, d1 - 1);
             let n2 = rnd(1, d2 - 1);
-
             op = Math.random() > 0.5 ? '+' : '-';
 
-            const valFraction1 = n1 / d1;
-            const valFraction2 = n2 / d2;
-            const valTotal1 = w1 + valFraction1;
-            const valTotal2 = w2 + valFraction2;
+            const val1 = w1 + n1/d1;
+            const val2 = w2 + n2/d2;
 
             if (level === 1) {
                 if (op === '+') {
-                    // STUFE 1 ADDITION: Bruchanteile dürfen zusammen nicht > 1 sein
-                    if (valFraction1 + valFraction2 <= 1) {
-                        num1_obj = { w: w1, n: n1, d: d1 };
-                        num2_obj = { w: w2, n: n2, d: d2 };
-                        validTaskFound = true;
-                    }
+                    if (n1/d1 + n2/d2 <= 1) validTaskFound = true;
                 } else {
-                    // STUFE 1 SUBTRAKTION: Kein Borgen
-                    if (valTotal1 > valTotal2) {
-                        // Wenn Bruch 1 >= Bruch 2 ist, ist alles okay.
-                        if (valFraction1 >= valFraction2) {
-                            num1_obj = { w: w1, n: n1, d: d1 };
-                            num2_obj = { w: w2, n: n2, d: d2 };
-                            validTaskFound = true;
-                        } 
-                        // Wenn Bruch 1 kleiner ist, müssten wir borgen -> Aufgabe verwerfen und neu würfeln.
-                    }
+                    if (val1 > val2 && (n1/d1 >= n2/d2)) validTaskFound = true;
                 }
-            } 
-            else {
-                // STUFE 2: Alles erlaubt (außer negatives Gesamtergebnis)
-                if (op === '-') {
-                    if (valTotal1 < valTotal2) {
-                        // Tauschen, damit Ergebnis positiv bleibt
-                        let tempW = w1, tempN = n1, tempD = d1;
-                        w1 = w2; n1 = n2; d1 = d2;
-                        w2 = tempW; n2 = tempN; d2 = tempD;
-                    }
-                    // Verhindern von identischen Zahlen (Ergebnis 0 ist langweilig)
-                    if (Math.abs(valTotal1 - valTotal2) < 0.001) continue;
-                }
-                
-                num1_obj = { w: w1, n: n1, d: d1 };
-                num2_obj = { w: w2, n: n2, d: d2 };
-                validTaskFound = true;
-            }
-        }
-
-        currentTask = {
-            n1: num1_obj,
-            n2: num2_obj,
-            op: op
-        };
-
-        calculateSolution();
-        renderTask();
-    }
-
-    function calculateSolution() {
-        const num1 = currentTask.n1.w * currentTask.n1.d + currentTask.n1.n;
-        const den1 = currentTask.n1.d;
-        
-        const num2 = currentTask.n2.w * currentTask.n2.d + currentTask.n2.n;
-        const den2 = currentTask.n2.d;
-
-        const commonDenom = (den1 * den2) / gcd(den1, den2); // kgV
-
-        const num1_expanded = num1 * (commonDenom / den1);
-        const num2_expanded = num2 * (commonDenom / den2);
-
-        let resNum, resDenom;
-
-        if (currentTask.op === '+') {
-            resNum = num1_expanded + num2_expanded;
-        } else {
-            resNum = num1_expanded - num2_expanded;
-        }
-        resDenom = commonDenom;
-
-        const simple = simplify(resNum, resDenom);
-        resNum = simple[0];
-        resDenom = simple[1];
-
-        const resWhole = Math.floor(resNum / resDenom);
-        const resRemNum = resNum % resDenom;
-
-        currentTask.solution = {
-            w: resWhole,
-            n: resRemNum,
-            d: resDenom
-        };
-    }
-
-    function renderTask() {
-        const t = currentTask;
-        const html1 = `<span class="whole">${t.n1.w}</span><div class="fraction"><span class="top">${t.n1.n}</span><span class="bottom">${t.n1.d}</span></div>`;
-        const html2 = `<span class="whole">${t.n2.w}</span><div class="fraction"><span class="top">${t.n2.n}</span><span class="bottom">${t.n2.d}</span></div>`;
-        
-        document.getElementById('taskArea').innerHTML = `${html1} ${t.op} ${html2} = ?`;
-    }
-
-    function checkAnswer() {
-        const userW = parseInt(document.getElementById('inputWhole').value) || 0;
-        const userN = parseInt(document.getElementById('inputNum').value) || 0;
-        const userD = parseInt(document.getElementById('inputDenom').value) || 1;
-
-        const sol = currentTask.solution;
-        const userVal = userW + (userN / userD);
-        const solVal = sol.w + (sol.n / sol.d);
-
-        const feedbackEl = document.getElementById('feedback');
-
-        if (Math.abs(userVal - solVal) < 0.000001) {
-            const isSimplified = (userN === sol.n && userD === sol.d && userW === sol.w);
-            
-            if(sol.n === 0 && userN === 0 && userW === sol.w) {
-                 feedbackEl.innerHTML = "Richtig! Das Ergebnis ist eine ganze Zahl.";
-                 feedbackEl.className = "correct";
-            } else if (isSimplified) {
-                feedbackEl.innerHTML = "Perfekt! Richtig und vollständig gekürzt.";
-                feedbackEl.className = "correct";
             } else {
-                feedbackEl.innerHTML = `Richtig gerechnet! <br><span class='hint'>Aber du kannst noch kürzen oder umwandeln. Die beste Form ist: ${sol.w > 0 ? sol.w : ''} ${sol.n > 0 ? sol.n + '/' + sol.d : ''}</span>`;
-                feedbackEl.className = "correct";
-            }
-        } else {
-            let solString = sol.n === 0 ? `${sol.w}` : `${sol.w > 0 ? sol.w : ''} ${sol.n}/${sol.d}`;
-            feedbackEl.innerHTML = `Leider falsch. Die Lösung ist: <b>${solString}</b>`;
-            feedbackEl.className = "wrong";
-        }
-    }
-
-    // Start
-    generateTask();
-</script>
-
-</body>
-</html>
+                if (op === '-') {
+                    if (val1 < val2) { 
+                        [w1, w2] = [w2, w1]; [n1, n2] =
