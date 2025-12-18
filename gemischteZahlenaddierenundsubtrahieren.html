@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
+            /* HIER WURDE DIE FARBE GEÄNDERT */
+            background-color: #54a0ff; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,7 +20,8 @@
             background-color: white;
             padding: 2rem;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            /* Schatten etwas angepasst für besseren Kontrast zum blauen Hintergrund */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
             text-align: center;
             max-width: 550px;
             width: 90%;
@@ -243,21 +245,14 @@
                     }
                 } else {
                     // STUFE 1 SUBTRAKTION: Kein Borgen
-                    // Bedingung 1: Gesamtzahl 1 muss größer sein als 2 (keine negativen Ergebnisse)
-                    // Bedingung 2: Bruch 1 muss größer/gleich Bruch 2 sein
-                    
                     if (valTotal1 > valTotal2) {
-                        // Wenn der Bruch im Minuend kleiner ist als im Subtrahend, müssen wir tauschen oder neu generieren.
-                        // Um es einfach zu halten: Wir tauschen einfach die Bruchanteile, wenn w1 > w2, 
-                        // oder wir sorgen dafür, dass n1/d1 >= n2/d2 ist.
-                        
+                        // Wenn Bruch 1 >= Bruch 2 ist, ist alles okay.
                         if (valFraction1 >= valFraction2) {
                             num1_obj = { w: w1, n: n1, d: d1 };
                             num2_obj = { w: w2, n: n2, d: d2 };
                             validTaskFound = true;
                         } 
-                        // Falls Bruch 1 kleiner ist, aber w1 groß genug -> In Stufe 1 verboten (wäre Borgen)
-                        // Also verwerfen wir diese Kombination und die Schleife läuft weiter.
+                        // Wenn Bruch 1 kleiner ist, müssten wir borgen -> Aufgabe verwerfen und neu würfeln.
                     }
                 }
             } 
