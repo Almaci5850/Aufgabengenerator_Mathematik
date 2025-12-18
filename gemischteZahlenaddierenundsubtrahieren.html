@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trainer: Gemischte Zahlen addieren und subtrahieren</title>
+    <title>Trainer: Gemischte Zahlen</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -266,4 +266,184 @@
             } else {
                 if (op === '-') {
                     if (val1 < val2) { 
-                        [w1, w2] = [w2, w1]; [n1, n2] =
+                        [w1, w2] = [w2, w1]; [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1];
+                    }
+                    if (Math.abs(val1 - val2) > 0.001) validTaskFound = true;
+                } else {
+                    validTaskFound = true;
+                }
+            }
+            if(validTaskFound) {
+                num1_obj = { w: w1, n: n1, d: d1 };
+                num2_obj = { w: w2, n: n2, d: d2 };
+            }
+        }
+
+        currentTask = { n1: num1_obj, n2: num2_obj, op: op };
+        calculateSolution();
+        renderTask();
+    }
+
+    function calculateSolution() {
+        const t = currentTask;
+        
+        // Berechnung via unechte Brüche (intern, für die exakte Lösung)
+        const imp1 = { n: t.n1.w * t.n1.d + t.n1.n, d: t.n1.d };
+        const imp2 = { n: t.n2.w * t.n2.d + t.n2.n, d: t.n2.d };
+        const commonDenom = (t.n1.d * t.n2.d) / gcd(t.n1.d, t.n2.d);
+        t.commonD = commonDenom;
+
+        // Erweitere für Rechenweg-Anzeige (nicht intern, aber für Lösungstext)
+        t.expN1 = t.n1.n * (commonDenom / t.n1.d);
+        t.expN2 = t.n2.n * (commonDenom / t.n2.d);
+
+        const exp1 = imp1.n * (commonDenom / imp1.d);
+        const exp2 = imp2.n * (commonDenom / imp2.d);
+
+        let resNum = (t.op === '+') ? (exp1 + exp2) : (exp1 - exp2);
+        
+        const simple = simplify(resNum, commonDenom);
+        t.resSimple = { n: simple[0], d: simple[1] };
+
+        t.solution = {
+            w: Math.floor(t.resSimple.n / t.resSimple.d),
+            n: t.resSimple.n % t.resSimple.d,
+            d: t.resSimple.d
+        };
+    }
+
+    function renderTask() {
+        const t = currentTask;
+        const html1 = fracHTML(t.n1.w, t.n1.n, t.n1.d);
+        const html2 = fracHTML(t.n2.w, t.n2.n, t.n2.d);
+        document.getElementById('taskArea').innerHTML = `${html1} ${t.op} ${html2} = ?`;
+    }
+
+    function checkAnswer() {
+        const userW = parseInt(document.getElementById('inputWhole').value) || 0;
+        const userN = parseInt(document.getElementById('inputNum').value) || 0;
+        const userD = parseInt(document.getElementById('inputDenom').value) || 1;
+
+        const sol = currentTask.solution;
+        const userVal = userW + (userN / userD);
+        const solVal = sol.w + (sol.n / sol.d);
+        const feedbackEl = document.getElementById('feedback');
+
+        if (Math.abs(userVal - solVal) < 0.000001) {
+             const isSimplified = (userN === sol.n && userD === sol.d && userW === sol.w);
+             if (isSimplified || (sol.n === 0 && userN === 0 && userW === sol.w)) {
+                feedbackEl.innerHTML = "Perfekt! Alles richtig.";
+                feedbackEl.className = "correct";
+             } else {
+                feedbackEl.innerHTML = `Richtig gerechnet! Aber noch nicht vollständig gekürzt. <br>Lösung: ${fracHTML(sol.w, sol.n, sol.d)}`;
+                feedbackEl.className = "correct";
+             }
+        } else {
+            feedbackEl.innerHTML = `Noch nicht ganz richtig. Versuch es nochmal oder schau dir den Lösungsweg an.`;
+            feedbackEl.className = "wrong";
+        }
+    }
+
+    function showHint() {
+        const t = currentTask;
+        const box = document.getElementById('hintBox');
+        let hint = "";
+        if (t.n1.d !== t.n2.d) hint = "<b>Tipp:</b> Zuerst Hauptnenner finden und erweitern.";
+        else hint = "<b>Tipp:</b> Die Nenner sind schon gleich.";
+        
+        if (currentTask.op === '-' && t.expN1 < t.expN2) {
+             hint += "<br>Achtung: Der erste Bruch ist kleiner als der zweite. Du musst dir von der ganzen Zahl etwas 'borgen' (umwandeln).";
+        }
+        box.innerHTML = hint;
+        box.style.display = 'block';
+    }
+
+    // NEUE LÖSUNGSWEG FUNKTION (Ganze und Brüche getrennt)
+    function showSolution() {
+        const t = currentTask;
+        const box = document.getElementById('solutionBox');
+        let html = "";
+
+        // Schritt 1: Erweitern
+        html += `<span class="step-title">1. Auf Hauptnenner bringen (${t.commonD}):</span><br>`;
+        html += `${fracHTML(t.n1.w, t.n1.n, t.n1.d)} &rarr; <b>${fracHTML(t.n1.w, t.expN1, t.commonD)}</b><br>`;
+        html += `${fracHTML(t.n2.w, t.n2.n, t.n2.d)} &rarr; <b>${fracHTML(t.n2.w, t.expN2, t.commonD)}</b><br><br>`;
+
+        let finalW, finalN;
+
+        if (t.op === '+') {
+            html += `<span class="step-title">2. Getrennt addieren:</span><br>`;
+            // Ganze
+            const sumW = t.n1.w + t.n2.w;
+            // Brüche
+            const sumN = t.expN1 + t.expN2;
+            
+            html += `Ganze: ${t.n1.w} + ${t.n2.w} = <b>${sumW}</b><br>`;
+            html += `Brüche: ${simpleFracHTML(t.expN1, t.commonD)} + ${simpleFracHTML(t.expN2, t.commonD)} = <b>${simpleFracHTML(sumN, t.commonD)}</b><br>`;
+            
+            html += `<br>Zwischenergebnis: ${fracHTML(sumW, sumN, t.commonD)}<br>`;
+
+            // Check auf Übertrag
+            if (sumN >= t.commonD) {
+                html += `<span class="step-title">3. Umwandeln (Bruch > 1):</span><br>`;
+                const extraW = Math.floor(sumN / t.commonD);
+                const remN = sumN % t.commonD;
+                html += `${simpleFracHTML(sumN, t.commonD)} ist ${extraW} Ganzes und ${simpleFracHTML(remN, t.commonD)}.<br>`;
+                html += `Zu den ${sumW} Ganzen dazu addieren: ${sumW} + ${extraW} = <b>${sumW + extraW}</b>.<br>`;
+                finalN = remN;
+            } else {
+                finalN = sumN;
+            }
+
+        } else {
+            // SUBTRAKTION
+            html += `<span class="step-title">2. Vorbereitung und Subtraktion:</span><br>`;
+            
+            let w1 = t.n1.w;
+            let n1 = t.expN1;
+            
+            // Muss geborgt werden?
+            if (n1 < t.expN2) {
+                html += `Der erste Bruch (${n1}/${t.commonD}) ist kleiner als der zweite (${t.expN2}/${t.commonD}).<br>`;
+                html += `Wir wandeln ein Ganzes um: <br>`;
+                w1 = w1 - 1;
+                n1 = n1 + t.commonD;
+                html += `${fracHTML(t.n1.w, t.expN1, t.commonD)} wird zu <b>${fracHTML(w1, n1, t.commonD)}</b> (da 1 Ganzes = ${t.commonD}/${t.commonD}).<br><br>`;
+            }
+
+            const diffW = w1 - t.n2.w;
+            const diffN = n1 - t.expN2;
+
+            html += `Ganze: ${w1} - ${t.n2.w} = <b>${diffW}</b><br>`;
+            html += `Brüche: ${simpleFracHTML(n1, t.commonD)} - ${simpleFracHTML(t.expN2, t.commonD)} = <b>${simpleFracHTML(diffN, t.commonD)}</b><br>`;
+            
+            finalN = diffN;
+        }
+
+        // Schritt 4: Kürzen
+        const simple = simplify(finalN, t.commonD);
+        
+        // Final display logic
+        let resString = "";
+        if (simple[0] === 0) {
+            resString = `${t.solution.w}`;
+        } else {
+            resString = fracHTML(t.solution.w, simple[0], simple[1]);
+        }
+
+        html += `<br><span class="step-title">Letzter Schritt: Kürzen:</span><br>`;
+        if (finalN !== simple[0]) {
+             html += `${fracHTML(t.solution.w, finalN, t.commonD)} gekürzt &rarr; <b>${resString}</b>`;
+        } else {
+             html += `Ergebnis: <b>${resString}</b> (kann nicht weiter gekürzt werden)`;
+        }
+
+        box.innerHTML = html;
+        box.style.display = 'block';
+    }
+
+    generateTask();
+</script>
+
+</body>
+</html>
